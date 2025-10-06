@@ -380,6 +380,35 @@ footer a:hover {
     border-left: 4px solid #28a745;
 }
 
+.info-message {
+    background: #d1ecf1;
+    color: #0c5460;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #17a2b8;
+}
+
+.info-message h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #0c5460;
+}
+
+.info-message a {
+    color: #0c5460;
+    font-weight: 600;
+}
+
+.info-message a:hover {
+    text-decoration: underline;
+}
+
+.info-message .video-info {
+    background: rgba(255, 255, 255, 0.5);
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 @media (max-width: 1200px) {
     .models-container {
         grid-template-columns: 1fr;

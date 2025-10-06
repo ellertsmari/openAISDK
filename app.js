@@ -152,63 +152,34 @@ async function generateVideo() {
     const duration = document.getElementById('soraDuration').value;
     const quality = document.getElementById('soraQuality').value;
     
-    if (!apiKey) {
-        showError('videoOutput', 'Please enter your OpenAI API key first');
-        return;
-    }
-    
     if (!prompt) {
         showError('videoOutput', 'Please enter a video description');
         return;
     }
     
-    showLoading(`Generating video with SORA 2 API...\nThis may take a few moments.`);
-    
-    try {
-        // Call OpenAI SORA 2 API
-        const response = await fetch('https://api.openai.com/v1/video/generations', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: 'sora-2', // SORA 2 model
-                prompt: prompt,
-                duration: parseInt(duration),
-                quality: quality,
-                size: quality === '4k' ? '3840x2160' : quality === 'hd' ? '1920x1080' : '1280x720'
-            })
-        });
-        
-        hideLoading();
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'API request failed');
-        }
-        
-        const data = await response.json();
-        
-        // Display the generated video
-        displayVideo(data, prompt, duration, quality);
-        
-        showSuccess('videoOutput', 'Video generated successfully!');
-        
-    } catch (error) {
-        hideLoading();
-        console.error('Error generating video:', error);
-        
-        const videoOutput = document.getElementById('videoOutput');
-        videoOutput.innerHTML = `
-            <div class="error-message">
-                Error: ${error.message}. 
-                <br><br>
-                Note: SORA 2 API may require special access or the endpoint might be different. 
-                Please check the OpenAI documentation for the latest API details.
+    // Display informative message about SORA API availability
+    const videoOutput = document.getElementById('videoOutput');
+    videoOutput.classList.add('has-content');
+    videoOutput.innerHTML = `
+        <div class="info-message">
+            <h3>⚠️ SORA API Not Yet Available</h3>
+            <p>The SORA video generation API is not currently available through OpenAI's public API.</p>
+            <br>
+            <p><strong>Your request details:</strong></p>
+            <div class="video-info">
+                <p><strong>Prompt:</strong> ${prompt}</p>
+                <p><strong>Duration:</strong> ${duration} seconds</p>
+                <p><strong>Quality:</strong> ${quality.toUpperCase()}</p>
+                <p><strong>Model:</strong> SORA (when available)</p>
             </div>
-        `;
-    }
+            <br>
+            <p><strong>Note:</strong> OpenAI has announced SORA but has not yet released a public API endpoint for video generation. 
+            This interface is a demonstration of what the integration might look like when the API becomes available.</p>
+            <br>
+            <p>Please check the <a href="https://openai.com/sora" target="_blank">official SORA page</a> 
+            and <a href="https://platform.openai.com/docs" target="_blank">OpenAI API documentation</a> for updates on availability.</p>
+        </div>
+    `;
 }
 
 // Display generated video
