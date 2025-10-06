@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI SDK - SORA 2 & GPT5 PRO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OpenAI SDK Integration</h1>
+            <p class="subtitle">Experience SORA 2 API and GPT5 PRO Model</p>
+        </header>
+
+        <div class="api-key-section">
+            <label for="apiKey">OpenAI API Key:</label>
+            <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
+            <button onclick="saveApiKey()">Save Key</button>
+            <span id="keyStatus"></span>
+        </div>
+
+        <div class="models-container">
+            <!-- GPT5 PRO Section -->
+            <div class="model-section">
+                <h2>🤖 GPT5 PRO Model</h2>
+                <p class="model-description">Advanced language model for complex reasoning and text generation</p>
+                
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages"></div>
+                    
+                    <div class="input-section">
+                        <textarea id="gptPrompt" placeholder="Enter your prompt for GPT5 PRO..."></textarea>
+                        <button onclick="sendToGPT5Pro()" class="primary-btn">Send to GPT5 PRO</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SORA 2 Section -->
+            <div class="model-section">
+                <h2>🎬 SORA 2 API</h2>
+                <p class="model-description">Advanced video generation from text descriptions</p>
+                
+                <div class="video-container">
+                    <div class="input-section">
+                        <textarea id="soraPrompt" placeholder="Describe the video you want to generate..."></textarea>
+                        <div class="video-options">
+                            <label>
+                                Duration:
+                                <select id="soraDuration">
+                                    <option value="5">5 seconds</option>
+                                    <option value="10" selected>10 seconds</option>
+                                    <option value="15">15 seconds</option>
+                                    <option value="20">20 seconds</option>
+                                </select>
+                            </label>
+                            <label>
+                                Quality:
+                                <select id="soraQuality">
+                                    <option value="standard">Standard</option>
+                                    <option value="hd" selected>HD</option>
+                                    <option value="4k">4K</option>
+                                </select>
+                            </label>
+                        </div>
+                        <button onclick="generateVideo()" class="primary-btn">Generate Video</button>
+                    </div>
+                    
+                    <div id="videoOutput" class="video-output"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with OpenAI SDK | SORA 2 & GPT5 PRO | <a href="https://github.com/ellertsmari/openAISDK" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loadingText">Processing...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
