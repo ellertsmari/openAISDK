@@ -8,7 +8,7 @@ describe('OpenAI API Integration Tests', () => {
     mockFetch.mockClear();
   });
 
-  describe('GPT5 PRO API Call', () => {
+  describe('ChatGPT Pro API Call', () => {
     test('should make POST request with correct parameters', async () => {
       // Mock successful response
       const mockResponse = {
@@ -16,7 +16,7 @@ describe('OpenAI API Integration Tests', () => {
         json: jest.fn().mockResolvedValue({
           choices: [{
             message: {
-              content: 'Test response from GPT5 PRO'
+              content: 'Test response from ChatGPT Pro'
             }
           }]
         })
@@ -38,7 +38,7 @@ describe('OpenAI API Integration Tests', () => {
           messages: [
             {
               role: 'system',
-              content: 'You are GPT5 PRO, an advanced AI assistant with enhanced reasoning capabilities.'
+              content: 'You are ChatGPT Pro, an advanced AI assistant with enhanced reasoning capabilities and vision support.'
             },
             {
               role: 'user',
@@ -67,7 +67,88 @@ describe('OpenAI API Integration Tests', () => {
       
       // Verify we can get the data
       const data = await response.json();
-      expect(data.choices[0].message.content).toBe('Test response from GPT5 PRO');
+      expect(data.choices[0].message.content).toBe('Test response from ChatGPT Pro');
+    });
+
+    test('should support multimodal messages with image_url', async () => {
+      // Mock successful response
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          choices: [{
+            message: {
+              content: 'I can see the image. It shows...'
+            }
+          }]
+        })
+      };
+      mockFetch.mockResolvedValue(mockResponse);
+
+      // Simulate the API call with vision/image support
+      const apiKey = 'test-api-key';
+      const prompt = 'What do you see in this image?';
+      const base64Image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-pro',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are ChatGPT Pro, an advanced AI assistant with enhanced reasoning capabilities and vision support.'
+            },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: prompt
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/png;base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 2000,
+          temperature: 0.7
+        })
+      });
+
+      // Verify the fetch was called with correct parameters including image
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.openai.com/v1/chat/completions',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          })
+        })
+      );
+
+      // Verify the body contains multimodal content
+      const callArgs = mockFetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      expect(body.messages[1].content).toBeInstanceOf(Array);
+      expect(body.messages[1].content[0].type).toBe('text');
+      expect(body.messages[1].content[1].type).toBe('image_url');
+      expect(body.messages[1].content[1].image_url.url).toContain('data:image/png;base64,');
+
+      // Verify response is ok
+      expect(response.ok).toBe(true);
+      
+      // Verify we can get the data
+      const data = await response.json();
+      expect(data.choices[0].message.content).toContain('image');
     });
   });
 

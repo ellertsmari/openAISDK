@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenAI SDK - SORA & GPT5 PRO</title>
+    <title>OpenAI SDK - SORA & ChatGPT Pro</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>OpenAI SDK Integration</h1>
-            <p class="subtitle">Experience SORA API and GPT5 PRO Model</p>
+            <p class="subtitle">Experience SORA API and ChatGPT Pro Model</p>
         </header>
 
         <div class="api-key-section">
@@ -21,17 +21,24 @@
         </div>
 
         <div class="models-container">
-            <!-- GPT5 PRO Section -->
+            <!-- ChatGPT Pro Section -->
             <div class="model-section">
-                <h2>🤖 GPT5 PRO Model</h2>
-                <p class="model-description">Advanced language model for complex reasoning and text generation</p>
+                <h2>🤖 ChatGPT Pro Model</h2>
+                <p class="model-description">Advanced language model with vision support for complex reasoning and multimodal understanding</p>
                 
                 <div class="chat-container">
                     <div id="chatMessages" class="chat-messages"></div>
                     
                     <div class="input-section">
-                        <textarea id="gptPrompt" placeholder="Enter your prompt for GPT5 PRO..."></textarea>
-                        <button onclick="sendToGPT5Pro()" class="primary-btn">Send to GPT5 PRO</button>
+                        <textarea id="gptPrompt" placeholder="Enter your prompt for ChatGPT Pro..."></textarea>
+                        <div class="file-upload-section">
+                            <label for="gptFileInput" class="file-label">
+                                📎 Attach Files (Images supported)
+                            </label>
+                            <input type="file" id="gptFileInput" accept="image/*" multiple class="file-input">
+                            <span id="fileStatus" class="file-status"></span>
+                        </div>
+                        <button onclick="sendToGPT5Pro()" class="primary-btn">Send to ChatGPT Pro</button>
                     </div>
                 </div>
             </div>
@@ -63,7 +70,7 @@
         </div>
 
         <footer>
-            <p>Built with OpenAI SDK | SORA & GPT5 PRO | <a href="https://github.com/ellertsmari/openAISDK" target="_blank">GitHub</a></p>
+            <p>Built with OpenAI SDK | SORA & ChatGPT Pro | <a href="https://github.com/ellertsmari/openAISDK" target="_blank">GitHub</a></p>
         </footer>
     </div>
 
