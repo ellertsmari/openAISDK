@@ -166,7 +166,6 @@ async function generateVideo() {
         // Call OpenAI SORA API
         // Documentation: https://platform.openai.com/docs/guides/video-generation
         const response = await fetch('https://api.openai.com/v1/videos/generations', {
-            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`
