@@ -1,11 +1,13 @@
 # openAISDK
 
-A web interface for interacting with OpenAI's latest models: **SORA API** for video generation and **GPT5 PRO** for advanced language processing.
+A web interface for interacting with OpenAI's latest models: **SORA API** for video generation and **ChatGPT Pro** for advanced language processing with vision support.
 
 ## Features
 
-### 🤖 GPT5 PRO Model
+### 🤖 ChatGPT Pro Model
 - Advanced language model with enhanced reasoning capabilities
+- Vision support for image analysis and understanding
+- File upload capability for multimodal interactions
 - Chat interface for natural conversations
 - Real-time responses with streaming support
 - Context-aware conversations
@@ -18,7 +20,7 @@ A web interface for interacting with OpenAI's latest models: **SORA API** for vi
 ## Getting Started
 
 ### Prerequisites
-- An OpenAI API key with access to GPT5 PRO and SORA models
+- An OpenAI API key with access to ChatGPT Pro and SORA models
 - A modern web browser
 - A local web server (optional, but recommended)
 
@@ -45,11 +47,14 @@ cd openAISDK
 
 ### Usage
 
-#### Using GPT5 PRO:
+#### Using ChatGPT Pro:
 1. Enter your API key and click "Save Key"
-2. Type your prompt in the GPT5 PRO text area
-3. Click "Send to GPT5 PRO" or press Enter
-4. View the response in the chat interface
+2. Type your prompt in the ChatGPT Pro text area
+3. (Optional) Attach image files by clicking "📎 Attach Files" button
+4. Click "Send to ChatGPT Pro" or press Enter
+5. View the response in the chat interface
+
+**Vision Support**: ChatGPT Pro supports image analysis. You can upload images (JPG, PNG, etc.) along with your prompt to ask questions about the images or get visual analysis.
 
 #### Using SORA:
 1. Enter your API key and click "Save Key"
@@ -62,10 +67,12 @@ cd openAISDK
 
 ## API Models
 
-### GPT5 PRO
-- **Model ID**: `gpt-5-pro`
-- **Capabilities**: Advanced reasoning, complex problem-solving, enhanced context understanding
-- **Use Cases**: Code generation, analysis, creative writing, research assistance
+### ChatGPT Pro
+- **Model ID**: `chatgpt-4o-latest`
+- **Capabilities**: Advanced reasoning, complex problem-solving, enhanced context understanding, vision and image analysis
+- **Vision Support**: Can analyze images, understand visual content, read text from images, and provide detailed descriptions
+- **Use Cases**: Code generation, analysis, creative writing, research assistance, image analysis, visual Q&A
+- **File Support**: Images (JPEG, PNG, GIF, WebP) up to 20MB per image
 
 ### SORA
 - **Model ID**: `sora-turbo-2024-12-01`
@@ -88,7 +95,9 @@ openAISDK/
 
 ### API Integration
 The application uses the OpenAI SDK through direct REST API calls:
-- GPT5 PRO: `https://api.openai.com/v1/chat/completions`
+- ChatGPT Pro: `https://api.openai.com/v1/chat/completions`
+  - Supports multimodal input (text + images) via base64 encoding
+  - Model: `chatgpt-4o-latest`
 - SORA Video Generation: `https://api.openai.com/v1/videos` (POST)
 - SORA Status Check: `https://api.openai.com/v1/videos/{video_id}` (GET)
 - SORA Video Content: `https://api.openai.com/v1/videos/{video_id}/content` (GET)
@@ -122,15 +131,16 @@ MIT License - feel free to use this project for your own purposes.
 ## Acknowledgments
 - Built with OpenAI SDK
 - Announced at OpenAI Dev Day
-- Supports the latest SORA and GPT5 PRO models
+- Supports the latest SORA and ChatGPT Pro models with vision capabilities
 
 ## Troubleshooting
 
 ### "API request failed"
 - Verify your API key is correct
-- Check that you have access to GPT5 PRO and SORA models
+- Check that you have access to ChatGPT Pro and SORA models
 - Ensure your API key has sufficient credits
 - SORA API may require beta enrollment or special access
+- For vision features, ensure your API plan supports multimodal inputs
 
 ### Video not displaying
 - **Video generation is asynchronous**: The app will automatically poll for completion (up to 5 minutes)

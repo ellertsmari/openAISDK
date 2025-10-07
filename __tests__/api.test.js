@@ -8,7 +8,7 @@ describe('OpenAI API Integration Tests', () => {
     mockFetch.mockClear();
   });
 
-  describe('GPT5 PRO API Call', () => {
+  describe('ChatGPT Pro API Call', () => {
     test('should make POST request with correct parameters', async () => {
       // Mock successful response
       const mockResponse = {
@@ -16,7 +16,7 @@ describe('OpenAI API Integration Tests', () => {
         json: jest.fn().mockResolvedValue({
           choices: [{
             message: {
-              content: 'Test response from GPT5 PRO'
+              content: 'Test response from ChatGPT Pro'
             }
           }]
         })
@@ -34,11 +34,11 @@ describe('OpenAI API Integration Tests', () => {
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-5-pro',
+          model: 'chatgpt-4o-latest',
           messages: [
             {
               role: 'system',
-              content: 'You are GPT5 PRO, an advanced AI assistant with enhanced reasoning capabilities.'
+              content: 'You are ChatGPT Pro, an advanced AI assistant with enhanced reasoning capabilities and vision support.'
             },
             {
               role: 'user',
@@ -67,7 +67,7 @@ describe('OpenAI API Integration Tests', () => {
       
       // Verify we can get the data
       const data = await response.json();
-      expect(data.choices[0].message.content).toBe('Test response from GPT5 PRO');
+      expect(data.choices[0].message.content).toBe('Test response from ChatGPT Pro');
     });
   });
 
@@ -173,7 +173,7 @@ describe('OpenAI API Integration Tests', () => {
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-5-pro',
+          model: 'chatgpt-4o-latest',
           messages: []
         })
       });

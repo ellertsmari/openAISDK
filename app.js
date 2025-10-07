@@ -79,9 +79,23 @@ function showSuccess(container, message) {
     setTimeout(() => successDiv.remove(), 5000);
 }
 
-// GPT5 PRO Integration
+// Helper function to convert file to base64
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// ChatGPT Pro Integration
 async function sendToGPT5Pro() {
     const promptInput = document.getElementById('gptPrompt');
+    const fileInput = document.getElementById('gptFileInput');
     const prompt = promptInput.value.trim();
     
     if (!apiKey) {
@@ -95,13 +109,69 @@ async function sendToGPT5Pro() {
     }
     
     // Add user message to chat
-    addMessage('user', prompt);
+    let userMessageContent = prompt;
+    if (fileInput.files.length > 0) {
+        userMessageContent += ` [with ${fileInput.files.length} file(s)]`;
+    }
+    addMessage('user', userMessageContent);
     promptInput.value = '';
     
-    showLoading('GPT5 PRO is thinking...');
+    showLoading('ChatGPT Pro is thinking...');
     
     try {
-        // Call OpenAI API with GPT5 PRO model
+        // Build messages array
+        const messages = [
+            {
+                role: 'system',
+                content: 'You are ChatGPT Pro, an advanced AI assistant with enhanced reasoning capabilities and vision support.'
+            }
+        ];
+        
+        // Handle file uploads for vision
+        const files = Array.from(fileInput.files);
+        if (files.length > 0) {
+            // Build message content array with text and images
+            const userMessageContent = [
+                {
+                    type: 'text',
+                    text: prompt
+                }
+            ];
+            
+            // Process each file
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    // Handle image files
+                    const base64Data = await fileToBase64(file);
+                    userMessageContent.push({
+                        type: 'image_url',
+                        image_url: {
+                            url: `data:${file.type};base64,${base64Data}`
+                        }
+                    });
+                } else {
+                    // For non-image files, we can only mention them in the text
+                    // The OpenAI API doesn't support direct file uploads in chat completions
+                    userMessageContent[0].text += `\n\n[Note: File "${file.name}" of type ${file.type} was attached but cannot be directly processed. Please describe the file contents or use a different approach.]`;
+                }
+            }
+            
+            messages.push({
+                role: 'user',
+                content: userMessageContent
+            });
+            
+            // Clear file input after processing
+            fileInput.value = '';
+        } else {
+            // No files, just text
+            messages.push({
+                role: 'user',
+                content: prompt
+            });
+        }
+        
+        // Call OpenAI API with ChatGPT Pro model
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -109,17 +179,8 @@ async function sendToGPT5Pro() {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'gpt-5-pro', // GPT5 PRO model
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are GPT5 PRO, an advanced AI assistant with enhanced reasoning capabilities.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
+                model: 'chatgpt-4o-latest', // ChatGPT Pro model
+                messages: messages,
                 max_tokens: 2000,
                 temperature: 0.7
             })
@@ -140,7 +201,7 @@ async function sendToGPT5Pro() {
         
     } catch (error) {
         hideLoading();
-        console.error('Error calling GPT5 PRO:', error);
+        console.error('Error calling ChatGPT Pro:', error);
         addMessage('assistant', `Error: ${error.message}. Please check your API key and try again.`);
     }
 }
@@ -414,7 +475,21 @@ async function displayVideo(data, prompt, model = 'sora-2') {
     }
 }
 
-// Allow Enter key to send in GPT5 PRO textarea (Shift+Enter for new line)
+// Show selected files for ChatGPT Pro
+document.getElementById('gptFileInput').addEventListener('change', (e) => {
+    const fileStatus = document.getElementById('fileStatus');
+    const files = Array.from(e.target.files);
+    
+    if (files.length > 0) {
+        const fileNames = files.map(f => f.name).join(', ');
+        fileStatus.textContent = `Selected: ${fileNames}`;
+        fileStatus.style.color = '#28a745';
+    } else {
+        fileStatus.textContent = '';
+    }
+});
+
+// Allow Enter key to send in ChatGPT Pro textarea (Shift+Enter for new line)
 document.getElementById('gptPrompt').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
