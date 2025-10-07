@@ -280,5 +280,77 @@ describe('OpenAI API Integration Tests', () => {
       expect(data.url).toBe('https://example.com/video.mp4');
       expect(data.completed_at).toBeDefined();
     });
+
+    test('should fetch video content when completed but no URL provided', async () => {
+      const videoId = 'video_68e4769cd1e8819890b1a168b5d652ee045bd9b86366fe8a';
+      const apiKey = 'test-api-key';
+      
+      // Mock completed response without URL
+      const mockCompletedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'completed',
+          created_at: 1759803036,
+          completed_at: 1759803109,
+          error: null,
+          expires_at: 1759889509,
+          model: 'sora-2',
+          progress: 100,
+          remixed_from_video_id: null,
+          seconds: '4',
+          size: '720x1280'
+          // Note: No 'url' field
+        })
+      };
+
+      // Mock video content response
+      const mockVideoBlob = new Blob(['fake video data'], { type: 'video/mp4' });
+      const mockVideoResponse = {
+        ok: true,
+        blob: jest.fn().mockResolvedValue(mockVideoBlob)
+      };
+
+      // First call to get status (no URL), second call to get content
+      mockFetch
+        .mockResolvedValueOnce(mockCompletedResponse)
+        .mockResolvedValueOnce(mockVideoResponse);
+
+      // Get video status
+      const statusResponse = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      const data = await statusResponse.json();
+      expect(data.status).toBe('completed');
+      expect(data.url).toBeUndefined();
+      expect(data.id).toBe(videoId);
+
+      // Fetch video content (this is what displayVideo should do)
+      const videoResponse = await fetch(`https://api.openai.com/v1/videos/${videoId}/content`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        `https://api.openai.com/v1/videos/${videoId}/content`,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Authorization': `Bearer ${apiKey}`
+          })
+        })
+      );
+
+      const videoBlob = await videoResponse.blob();
+      expect(videoBlob).toBeDefined();
+      expect(videoBlob.type).toBe('video/mp4');
+    });
   });
 });

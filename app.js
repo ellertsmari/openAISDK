@@ -171,7 +171,7 @@ async function pollVideoStatus(videoId, prompt, model) {
             // Check if video is completed
             if (data.status === 'completed' || data.status === 'succeeded') {
                 hideLoading();
-                displayVideo(data, prompt, model);
+                await displayVideo(data, prompt, model);
                 showSuccess('videoOutput', 'Video generated successfully!');
                 return;
             }
@@ -248,7 +248,7 @@ async function generateVideo() {
         // Check if video is immediately available (synchronous response)
         if (data.status === 'completed' || data.status === 'succeeded' || data.url) {
             hideLoading();
-            displayVideo(data, prompt, selectedModel);
+            await displayVideo(data, prompt, selectedModel);
             showSuccess('videoOutput', 'Video generated successfully!');
         }
         // If video is queued or in progress, poll for completion
@@ -263,7 +263,7 @@ async function generateVideo() {
         // Unknown response format
         else {
             hideLoading();
-            displayVideo(data, prompt, selectedModel);
+            await displayVideo(data, prompt, selectedModel);
             showSuccess('videoOutput', 'Video request submitted!');
         }
         
@@ -285,7 +285,7 @@ async function generateVideo() {
 }
 
 // Display generated video
-function displayVideo(data, prompt, model = 'sora-2') {
+async function displayVideo(data, prompt, model = 'sora-2') {
     const videoOutput = document.getElementById('videoOutput');
     videoOutput.classList.add('has-content');
     
@@ -301,6 +301,50 @@ function displayVideo(data, prompt, model = 'sora-2') {
     // Check in outputs array
     if (!videoUrl && data.outputs && data.outputs.length > 0) {
         videoUrl = data.outputs[0].url || data.outputs[0].download_url;
+    }
+    
+    // If no URL but video is completed, fetch the video content from the API
+    if (!videoUrl && (data.status === 'completed' || data.status === 'succeeded') && data.id) {
+        try {
+            showLoading('Retrieving completed video...');
+            const videoResponse = await fetch(`https://api.openai.com/v1/videos/${data.id}/content`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`
+                }
+            });
+            
+            hideLoading();
+            
+            if (!videoResponse.ok) {
+                throw new Error('Failed to retrieve video content');
+            }
+            
+            // Get the video as a blob and create an object URL
+            const videoBlob = await videoResponse.blob();
+            videoUrl = URL.createObjectURL(videoBlob);
+        } catch (error) {
+            hideLoading();
+            console.error('Error retrieving video content:', error);
+            videoOutput.innerHTML = `
+                <div class="error-message">
+                    Error retrieving video content: ${error.message}
+                    <br><br>
+                    The video generation completed, but the video file could not be retrieved.
+                </div>
+                <div class="video-info">
+                    <p><strong>Prompt:</strong> ${prompt}</p>
+                    <p><strong>Model:</strong> ${model}</p>
+                    <p><strong>Status:</strong> ${data.status || 'Processing'}</p>
+                    ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #667eea;">Show API Response</summary>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto; margin-top: 10px;">${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                </div>
+            `;
+            return;
+        }
     }
     
     if (!videoUrl) {
