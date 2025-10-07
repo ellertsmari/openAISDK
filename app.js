@@ -172,7 +172,7 @@ async function generateVideo() {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'sora-turbo-2024-12-01',
+                model: 'sora-2',
                 prompt: prompt
             })
         });
