@@ -91,12 +91,14 @@ The application uses the OpenAI SDK through direct REST API calls:
 - GPT5 PRO: `https://api.openai.com/v1/chat/completions`
 - SORA Video Generation: `https://api.openai.com/v1/videos` (POST)
 - SORA Status Check: `https://api.openai.com/v1/videos/{video_id}` (GET)
+- SORA Video Content: `https://api.openai.com/v1/videos/{video_id}/content` (GET)
 
 #### Video Generation Flow
 1. Submit video generation request
 2. Receive job ID with status "queued"
 3. Poll status endpoint every 5 seconds (max 60 attempts)
-4. Display video when status becomes "completed"
+4. When status becomes "completed", retrieve video content from `/content` endpoint
+5. Display video using blob URL
 
 For more details, see the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation).
 
