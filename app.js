@@ -149,6 +149,8 @@ async function sendToGPT5Pro() {
 async function generateVideo() {
     const promptInput = document.getElementById('soraPrompt');
     const prompt = promptInput.value.trim();
+    const modelSelect = document.getElementById('soraModel');
+    const selectedModel = modelSelect.value;
     
     if (!apiKey) {
         showError('videoOutput', 'Please enter your OpenAI API key first');
@@ -160,7 +162,7 @@ async function generateVideo() {
         return;
     }
     
-    showLoading(`Generating video with SORA API...\nThis may take a few moments.`);
+    showLoading(`Generating video with ${selectedModel}...\nThis may take a few moments.`);
     
     try {
         // Call OpenAI SORA API
@@ -172,7 +174,7 @@ async function generateVideo() {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'sora-2',
+                model: selectedModel,
                 prompt: prompt
             })
         });
@@ -187,7 +189,7 @@ async function generateVideo() {
         const data = await response.json();
         
         // Display the generated video
-        displayVideo(data, prompt);
+        displayVideo(data, prompt, selectedModel);
         
         showSuccess('videoOutput', 'Video generated successfully!');
         
@@ -209,7 +211,7 @@ async function generateVideo() {
 }
 
 // Display generated video
-function displayVideo(data, prompt) {
+function displayVideo(data, prompt, model = 'sora-2') {
     const videoOutput = document.getElementById('videoOutput');
     videoOutput.classList.add('has-content');
     
@@ -222,6 +224,7 @@ function displayVideo(data, prompt) {
             <div class="video-info">
                 <h3>Response Received</h3>
                 <p><strong>Prompt:</strong> ${prompt}</p>
+                <p><strong>Model:</strong> ${model}</p>
                 <p><strong>Status:</strong> Video generation initiated</p>
                 <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
             </div>
@@ -229,18 +232,45 @@ function displayVideo(data, prompt) {
         return;
     }
     
+    // Create video element with better handling
     videoOutput.innerHTML = `
-        <video controls autoplay>
+        <video controls autoplay style="max-width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
             <source src="${videoUrl}" type="video/mp4">
+            <source src="${videoUrl}" type="video/webm">
+            <source src="${videoUrl}">
             Your browser does not support the video tag.
         </video>
         <div class="video-info">
             <p><strong>Prompt:</strong> ${prompt}</p>
-            <p><strong>Model:</strong> sora-turbo-2024-12-01</p>
+            <p><strong>Model:</strong> ${model}</p>
             ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
             ${data.revised_prompt ? `<p><strong>Revised Prompt:</strong> ${data.revised_prompt}</p>` : ''}
         </div>
     `;
+    
+    // Add error handling for video loading
+    const videoElement = videoOutput.querySelector('video');
+    if (videoElement) {
+        videoElement.addEventListener('error', (e) => {
+            console.error('Video loading error:', e);
+            videoOutput.innerHTML = `
+                <div class="error-message">
+                    Error loading video. The video URL may be invalid or the video format is not supported.
+                    <br><br>
+                    <strong>Video URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a>
+                </div>
+                <div class="video-info">
+                    <p><strong>Prompt:</strong> ${prompt}</p>
+                    <p><strong>Model:</strong> ${model}</p>
+                    ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
+                </div>
+            `;
+        });
+        
+        videoElement.addEventListener('loadeddata', () => {
+            console.log('Video loaded successfully');
+        });
+    }
 }
 
 // Allow Enter key to send in GPT5 PRO textarea (Shift+Enter for new line)
