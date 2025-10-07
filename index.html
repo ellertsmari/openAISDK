@@ -42,6 +42,16 @@
                 <p class="model-description">Advanced video generation from text descriptions</p>
                 
                 <div class="video-container">
+                    <div class="video-options">
+                        <label>
+                            Model:
+                            <select id="soraModel">
+                                <option value="sora-2">sora-2</option>
+                                <option value="sora-2-pro">sora-2-pro</option>
+                            </select>
+                        </label>
+                    </div>
+                    
                     <div class="input-section">
                         <textarea id="soraPrompt" placeholder="Describe the video you want to generate..."></textarea>
                         <button onclick="generateVideo()" class="primary-btn">Generate Video</button>
