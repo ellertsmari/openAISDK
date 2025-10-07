@@ -1,0 +1,20 @@
+{
+  "name": "openaisdk",
+  "version": "1.0.0",
+  "description": "A web interface for interacting with OpenAI's latest models: **SORA API** for video generation and **GPT5 PRO** for advanced language processing.",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "node-fetch": "^2.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/__tests__/**/*.test.js"]
+  }
+}
