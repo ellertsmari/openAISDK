@@ -55,7 +55,10 @@ cd openAISDK
 1. Enter your API key and click "Save Key"
 2. Describe the video you want to generate
 3. Click "Generate Video" or press Enter
-4. Wait for the video to be generated and displayed
+4. Wait for the video to be generated (typically 1-5 minutes)
+   - The app will automatically check the generation status every 5 seconds
+   - You'll see progress updates in the loading indicator
+5. Once complete, the video will be displayed with a download link
 
 ## API Models
 
@@ -86,7 +89,14 @@ openAISDK/
 ### API Integration
 The application uses the OpenAI SDK through direct REST API calls:
 - GPT5 PRO: `https://api.openai.com/v1/chat/completions`
-- SORA: `https://api.openai.com/v1/videos`
+- SORA Video Generation: `https://api.openai.com/v1/videos` (POST)
+- SORA Status Check: `https://api.openai.com/v1/videos/{video_id}` (GET)
+
+#### Video Generation Flow
+1. Submit video generation request
+2. Receive job ID with status "queued"
+3. Poll status endpoint every 5 seconds (max 60 attempts)
+4. Display video when status becomes "completed"
 
 For more details, see the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation).
 
@@ -121,6 +131,8 @@ MIT License - feel free to use this project for your own purposes.
 - SORA API may require beta enrollment or special access
 
 ### Video not displaying
+- **Video generation is asynchronous**: The app will automatically poll for completion (up to 5 minutes)
+- Watch the loading indicator for status updates during generation
 - SORA API may require special access or beta enrollment
 - Check the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation) for the latest details
 - Verify the response format matches the expected structure

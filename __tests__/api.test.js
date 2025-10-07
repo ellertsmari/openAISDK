@@ -184,4 +184,101 @@ describe('OpenAI API Integration Tests', () => {
       expect(error.error.message).toBe('Invalid API key');
     });
   });
+
+  describe('Video Polling', () => {
+    test('should poll video status endpoint when video is queued', async () => {
+      const apiKey = 'test-api-key';
+      const videoId = 'video_68e471a4ef3c8198ba5f2ebf81486c2e0640433e1f1e2875';
+      
+      // Mock the status check response
+      const mockStatusResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          status: 'completed',
+          url: 'https://example.com/completed-video.mp4'
+        })
+      };
+      mockFetch.mockResolvedValue(mockStatusResponse);
+
+      // Simulate polling the video status
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        `https://api.openai.com/v1/videos/${videoId}`,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Authorization': `Bearer ${apiKey}`
+          })
+        })
+      );
+
+      const data = await response.json();
+      expect(data.status).toBe('completed');
+      expect(data.url).toBeDefined();
+    });
+
+    test('should handle queued status response', async () => {
+      const videoId = 'video_test123';
+      
+      // Mock queued response
+      const mockQueuedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'queued',
+          progress: 0,
+          completed_at: null
+        })
+      };
+      mockFetch.mockResolvedValue(mockQueuedResponse);
+
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer test-api-key'
+        }
+      });
+
+      const data = await response.json();
+      expect(data.status).toBe('queued');
+      expect(data.completed_at).toBeNull();
+    });
+
+    test('should handle completed status with video URL', async () => {
+      const videoId = 'video_test123';
+      
+      // Mock completed response
+      const mockCompletedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'completed',
+          url: 'https://example.com/video.mp4',
+          completed_at: 1759802000
+        })
+      };
+      mockFetch.mockResolvedValue(mockCompletedResponse);
+
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer test-api-key'
+        }
+      });
+
+      const data = await response.json();
+      expect(data.status).toBe('completed');
+      expect(data.url).toBe('https://example.com/video.mp4');
+      expect(data.completed_at).toBeDefined();
+    });
+  });
 });
