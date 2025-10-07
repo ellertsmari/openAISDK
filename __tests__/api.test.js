@@ -91,8 +91,9 @@ describe('OpenAI API Integration Tests', () => {
       const prompt = 'A beautiful sunset over the ocean';
 
       // This is the actual call pattern from the code (line 168-177)
-      // NOTE: This test will FAIL because the code is missing method: 'POST'
+      // After fix: includes method: 'POST'
       const response = await fetch('https://api.openai.com/v1/videos/generations', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
