@@ -145,6 +145,64 @@ async function sendToGPT5Pro() {
     }
 }
 
+// Poll video status until completed
+async function pollVideoStatus(videoId, prompt, model) {
+    const maxAttempts = 60; // Poll for up to 5 minutes (60 * 5 seconds)
+    const pollInterval = 5000; // Poll every 5 seconds
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            showLoading(`Generating video with ${model}...\nChecking status (attempt ${attempt}/${maxAttempts})...`);
+            
+            const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`
+                }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Failed to check video status');
+            }
+            
+            const data = await response.json();
+            
+            // Check if video is completed
+            if (data.status === 'completed' || data.status === 'succeeded') {
+                hideLoading();
+                displayVideo(data, prompt, model);
+                showSuccess('videoOutput', 'Video generated successfully!');
+                return;
+            }
+            
+            // Check if video generation failed
+            if (data.status === 'failed' || data.status === 'error') {
+                hideLoading();
+                throw new Error(data.error || 'Video generation failed');
+            }
+            
+            // If still queued or in_progress, wait before next poll
+            if (data.status === 'queued' || data.status === 'in_progress') {
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+                continue;
+            }
+            
+            // Unknown status
+            hideLoading();
+            throw new Error(`Unknown video status: ${data.status}`);
+            
+        } catch (error) {
+            hideLoading();
+            throw error;
+        }
+    }
+    
+    // Timeout reached
+    hideLoading();
+    throw new Error('Video generation timed out. Please try again later.');
+}
+
 // SORA Video Generation
 async function generateVideo() {
     const promptInput = document.getElementById('soraPrompt');
@@ -179,19 +237,35 @@ async function generateVideo() {
             })
         });
         
-        hideLoading();
-        
         if (!response.ok) {
+            hideLoading();
             const error = await response.json();
             throw new Error(error.error?.message || 'API request failed');
         }
         
         const data = await response.json();
         
-        // Display the generated video
-        displayVideo(data, prompt, selectedModel);
-        
-        showSuccess('videoOutput', 'Video generated successfully!');
+        // Check if video is immediately available (synchronous response)
+        if (data.status === 'completed' || data.status === 'succeeded' || data.url) {
+            hideLoading();
+            displayVideo(data, prompt, selectedModel);
+            showSuccess('videoOutput', 'Video generated successfully!');
+        }
+        // If video is queued or in progress, poll for completion
+        else if (data.status === 'queued' || data.status === 'in_progress') {
+            if (!data.id) {
+                hideLoading();
+                throw new Error('Video ID not provided in response');
+            }
+            // Poll until video is ready
+            await pollVideoStatus(data.id, prompt, selectedModel);
+        }
+        // Unknown response format
+        else {
+            hideLoading();
+            displayVideo(data, prompt, selectedModel);
+            showSuccess('videoOutput', 'Video request submitted!');
+        }
         
     } catch (error) {
         hideLoading();
@@ -216,17 +290,33 @@ function displayVideo(data, prompt, model = 'sora-2') {
     videoOutput.classList.add('has-content');
     
     // Handle different possible response formats from the API
-    let videoUrl = data.url || data.data?.[0]?.url || data.video_url;
+    // Check for video URL in various possible locations
+    let videoUrl = data.url || data.data?.[0]?.url || data.video_url || data.output?.url;
+    
+    // For download_url field (some APIs return this)
+    if (!videoUrl && data.download_url) {
+        videoUrl = data.download_url;
+    }
+    
+    // Check in outputs array
+    if (!videoUrl && data.outputs && data.outputs.length > 0) {
+        videoUrl = data.outputs[0].url || data.outputs[0].download_url;
+    }
     
     if (!videoUrl) {
-        // If no URL, show data for debugging
+        // If no URL, show data for debugging with helpful message
         videoOutput.innerHTML = `
             <div class="video-info">
-                <h3>Response Received</h3>
+                <h3>Video Generation In Progress</h3>
                 <p><strong>Prompt:</strong> ${prompt}</p>
                 <p><strong>Model:</strong> ${model}</p>
-                <p><strong>Status:</strong> Video generation initiated</p>
-                <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
+                <p><strong>Status:</strong> ${data.status || 'Processing'}</p>
+                ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
+                <p style="margin-top: 15px;">The video is being generated. This can take several minutes.</p>
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; color: #667eea;">Show API Response</summary>
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto; margin-top: 10px;">${JSON.stringify(data, null, 2)}</pre>
+                </details>
             </div>
         `;
         return;
@@ -245,6 +335,7 @@ function displayVideo(data, prompt, model = 'sora-2') {
             <p><strong>Model:</strong> ${model}</p>
             ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
             ${data.revised_prompt ? `<p><strong>Revised Prompt:</strong> ${data.revised_prompt}</p>` : ''}
+            <p style="margin-top: 10px;"><a href="${videoUrl}" target="_blank" download>Download Video</a></p>
         </div>
     `;
     
