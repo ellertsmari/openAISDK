@@ -233,7 +233,9 @@ async function generateVideo() {
             },
             body: JSON.stringify({
                 model: selectedModel,
-                prompt: prompt
+                prompt: prompt,
+                seconds: "12",           // "4" | "8" | "12"  (default is "4")
+                size: "1280x720"        // or "720x1280" (Sora-2 supports these two)
             })
         });
         
