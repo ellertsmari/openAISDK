@@ -92,7 +92,7 @@ describe('OpenAI API Integration Tests', () => {
 
       // This is the actual call pattern from the code (line 168-177)
       // After fix: includes method: 'POST'
-      const response = await fetch('https://api.openai.com/v1/videos/generations', {
+      const response = await fetch('https://api.openai.com/v1/videos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ describe('OpenAI API Integration Tests', () => {
 
       // Verify the fetch was called
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.openai.com/v1/videos/generations',
+        'https://api.openai.com/v1/videos',
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
