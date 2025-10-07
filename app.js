@@ -147,7 +147,7 @@ async function sendToGPT5Pro() {
 
 // Poll video status until completed
 async function pollVideoStatus(videoId, prompt, model) {
-    const maxAttempts = 60; // Poll for up to 5 minutes (60 * 5 seconds)
+    const maxAttempts = 180; // Poll for up to 15 minutes (180 * 5 seconds)
     const pollInterval = 5000; // Poll every 5 seconds
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
