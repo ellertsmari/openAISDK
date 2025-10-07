@@ -86,7 +86,7 @@ openAISDK/
 ### API Integration
 The application uses the OpenAI SDK through direct REST API calls:
 - GPT5 PRO: `https://api.openai.com/v1/chat/completions`
-- SORA: `https://api.openai.com/v1/video/generations`
+- SORA: `https://api.openai.com/v1/videos/generations`
 
 For more details, see the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation).
 
