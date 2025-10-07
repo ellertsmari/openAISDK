@@ -352,5 +352,102 @@ describe('OpenAI API Integration Tests', () => {
       expect(videoBlob).toBeDefined();
       expect(videoBlob.type).toBe('video/mp4');
     });
+
+    test('should handle error object properly when video generation fails', async () => {
+      const videoId = 'video_test_failed';
+      const apiKey = 'test-api-key';
+      
+      // Mock failed response with error as an object
+      const mockFailedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'failed',
+          error: {
+            message: 'Video generation failed due to content policy violation',
+            code: 'content_policy_violation'
+          }
+        })
+      };
+      mockFetch.mockResolvedValue(mockFailedResponse);
+
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      const data = await response.json();
+      expect(data.status).toBe('failed');
+      expect(data.error).toBeDefined();
+      expect(typeof data.error).toBe('object');
+      
+      // Verify the error has a message property that can be extracted
+      expect(data.error.message).toBe('Video generation failed due to content policy violation');
+    });
+
+    test('should handle error as string when video generation fails', async () => {
+      const videoId = 'video_test_failed_string';
+      const apiKey = 'test-api-key';
+      
+      // Mock failed response with error as a string
+      const mockFailedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'failed',
+          error: 'Simple error message as string'
+        })
+      };
+      mockFetch.mockResolvedValue(mockFailedResponse);
+
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      const data = await response.json();
+      expect(data.status).toBe('failed');
+      expect(data.error).toBeDefined();
+      expect(typeof data.error).toBe('string');
+      expect(data.error).toBe('Simple error message as string');
+    });
+
+    test('should handle nested error object structure', async () => {
+      const videoId = 'video_test_nested_error';
+      const apiKey = 'test-api-key';
+      
+      // Mock failed response with nested error structure
+      const mockFailedResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          id: videoId,
+          object: 'video',
+          status: 'failed',
+          error: {
+            error: {
+              message: 'Nested error message'
+            }
+          }
+        })
+      };
+      mockFetch.mockResolvedValue(mockFailedResponse);
+
+      const response = await fetch(`https://api.openai.com/v1/videos/${videoId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      const data = await response.json();
+      expect(data.status).toBe('failed');
+      expect(data.error.error.message).toBe('Nested error message');
+    });
   });
 });

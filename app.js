@@ -179,7 +179,11 @@ async function pollVideoStatus(videoId, prompt, model) {
             // Check if video generation failed
             if (data.status === 'failed' || data.status === 'error') {
                 hideLoading();
-                throw new Error(data.error || 'Video generation failed');
+                // Handle error message whether it's a string or an object
+                const errorMessage = typeof data.error === 'string' 
+                    ? data.error 
+                    : (data.error?.message || data.error?.error?.message || 'Video generation failed');
+                throw new Error(errorMessage);
             }
             
             // If still queued or in_progress, wait before next poll
