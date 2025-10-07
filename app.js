@@ -145,12 +145,10 @@ async function sendToGPT5Pro() {
     }
 }
 
-// SORA 2 Video Generation
+// SORA Video Generation
 async function generateVideo() {
     const promptInput = document.getElementById('soraPrompt');
     const prompt = promptInput.value.trim();
-    const duration = document.getElementById('soraDuration').value;
-    const quality = document.getElementById('soraQuality').value;
     
     if (!apiKey) {
         showError('videoOutput', 'Please enter your OpenAI API key first');
@@ -162,10 +160,11 @@ async function generateVideo() {
         return;
     }
     
-    showLoading(`Generating video with SORA 2 API...\nThis may take a few moments.`);
+    showLoading(`Generating video with SORA API...\nThis may take a few moments.`);
     
     try {
-        // Call OpenAI SORA 2 API
+        // Call OpenAI SORA API
+        // Documentation: https://platform.openai.com/docs/guides/video-generation
         const response = await fetch('https://api.openai.com/v1/video/generations', {
             method: 'POST',
             headers: {
@@ -173,11 +172,8 @@ async function generateVideo() {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'sora-2', // SORA 2 model
-                prompt: prompt,
-                duration: parseInt(duration),
-                quality: quality,
-                size: quality === '4k' ? '3840x2160' : quality === 'hd' ? '1920x1080' : '1280x720'
+                model: 'sora-turbo-2024-12-01',
+                prompt: prompt
             })
         });
         
@@ -191,7 +187,7 @@ async function generateVideo() {
         const data = await response.json();
         
         // Display the generated video
-        displayVideo(data, prompt, duration, quality);
+        displayVideo(data, prompt);
         
         showSuccess('videoOutput', 'Video generated successfully!');
         
@@ -204,19 +200,20 @@ async function generateVideo() {
             <div class="error-message">
                 Error: ${error.message}. 
                 <br><br>
-                Note: SORA 2 API may require special access or the endpoint might be different. 
-                Please check the OpenAI documentation for the latest API details.
+                Note: SORA API may require special access or beta enrollment. 
+                Please check the OpenAI documentation for the latest API details: 
+                <a href="https://platform.openai.com/docs/guides/video-generation" target="_blank">Video Generation Guide</a>
             </div>
         `;
     }
 }
 
 // Display generated video
-function displayVideo(data, prompt, duration, quality) {
+function displayVideo(data, prompt) {
     const videoOutput = document.getElementById('videoOutput');
     videoOutput.classList.add('has-content');
     
-    // Handle different possible response formats
+    // Handle different possible response formats from the API
     let videoUrl = data.url || data.data?.[0]?.url || data.video_url;
     
     if (!videoUrl) {
@@ -225,8 +222,6 @@ function displayVideo(data, prompt, duration, quality) {
             <div class="video-info">
                 <h3>Response Received</h3>
                 <p><strong>Prompt:</strong> ${prompt}</p>
-                <p><strong>Duration:</strong> ${duration}s</p>
-                <p><strong>Quality:</strong> ${quality}</p>
                 <p><strong>Status:</strong> Video generation initiated</p>
                 <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
             </div>
@@ -241,10 +236,9 @@ function displayVideo(data, prompt, duration, quality) {
         </video>
         <div class="video-info">
             <p><strong>Prompt:</strong> ${prompt}</p>
-            <p><strong>Duration:</strong> ${duration} seconds</p>
-            <p><strong>Quality:</strong> ${quality.toUpperCase()}</p>
-            <p><strong>Model:</strong> SORA 2</p>
+            <p><strong>Model:</strong> sora-turbo-2024-12-01</p>
             ${data.id ? `<p><strong>Video ID:</strong> ${data.id}</p>` : ''}
+            ${data.revised_prompt ? `<p><strong>Revised Prompt:</strong> ${data.revised_prompt}</p>` : ''}
         </div>
     `;
 }

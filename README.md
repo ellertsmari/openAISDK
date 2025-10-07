@@ -1,6 +1,6 @@
 # openAISDK
 
-A web interface for interacting with OpenAI's latest models: **SORA 2 API** for video generation and **GPT5 PRO** for advanced language processing.
+A web interface for interacting with OpenAI's latest models: **SORA API** for video generation and **GPT5 PRO** for advanced language processing.
 
 ## Features
 
@@ -10,16 +10,15 @@ A web interface for interacting with OpenAI's latest models: **SORA 2 API** for 
 - Real-time responses with streaming support
 - Context-aware conversations
 
-### 🎬 SORA 2 API
-- Text-to-video generation
-- Customizable video duration (5-20 seconds)
-- Multiple quality options (Standard, HD, 4K)
+### 🎬 SORA API
+- Text-to-video generation using state-of-the-art AI
+- Simple prompt-based interface
 - Real-time video preview
 
 ## Getting Started
 
 ### Prerequisites
-- An OpenAI API key with access to GPT5 PRO and SORA 2 models
+- An OpenAI API key with access to GPT5 PRO and SORA models
 - A modern web browser
 - A local web server (optional, but recommended)
 
@@ -52,12 +51,11 @@ cd openAISDK
 3. Click "Send to GPT5 PRO" or press Enter
 4. View the response in the chat interface
 
-#### Using SORA 2:
+#### Using SORA:
 1. Enter your API key and click "Save Key"
 2. Describe the video you want to generate
-3. Select duration and quality options
-4. Click "Generate Video" or press Enter
-5. Wait for the video to be generated and displayed
+3. Click "Generate Video" or press Enter
+4. Wait for the video to be generated and displayed
 
 ## API Models
 
@@ -66,13 +64,13 @@ cd openAISDK
 - **Capabilities**: Advanced reasoning, complex problem-solving, enhanced context understanding
 - **Use Cases**: Code generation, analysis, creative writing, research assistance
 
-### SORA 2
-- **Model ID**: `sora-2`
+### SORA
+- **Model ID**: `sora-turbo-2024-12-01`
 - **Capabilities**: Text-to-video generation with advanced understanding of physics and motion
 - **Parameters**:
-  - `duration`: Video length in seconds (5-20)
-  - `quality`: Output resolution (standard/hd/4k)
-  - `prompt`: Text description of the video
+  - `model`: The model identifier (required)
+  - `prompt`: Text description of the video (required)
+- **Documentation**: [Video Generation Guide](https://platform.openai.com/docs/guides/video-generation)
 
 ## Technical Details
 
@@ -88,7 +86,9 @@ openAISDK/
 ### API Integration
 The application uses the OpenAI SDK through direct REST API calls:
 - GPT5 PRO: `https://api.openai.com/v1/chat/completions`
-- SORA 2: `https://api.openai.com/v1/video/generations`
+- SORA: `https://api.openai.com/v1/video/generations`
+
+For more details, see the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation).
 
 ### Security Notes
 - API keys are stored in sessionStorage (cleared when browser is closed)
@@ -110,19 +110,21 @@ MIT License - feel free to use this project for your own purposes.
 ## Acknowledgments
 - Built with OpenAI SDK
 - Announced at OpenAI Dev Day
-- Supports the latest SORA 2 and GPT5 PRO models
+- Supports the latest SORA and GPT5 PRO models
 
 ## Troubleshooting
 
 ### "API request failed"
 - Verify your API key is correct
-- Check that you have access to GPT5 PRO and SORA 2 models
+- Check that you have access to GPT5 PRO and SORA models
 - Ensure your API key has sufficient credits
+- SORA API may require beta enrollment or special access
 
 ### Video not displaying
-- SORA 2 API may require special access
-- Check the OpenAI documentation for the latest endpoint details
+- SORA API may require special access or beta enrollment
+- Check the [OpenAI Video Generation Documentation](https://platform.openai.com/docs/guides/video-generation) for the latest details
 - Verify the response format matches the expected structure
+- Ensure your API key has access to video generation features
 
 ### CORS errors
 - Use a local web server instead of opening the file directly
