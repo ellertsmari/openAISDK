@@ -1,20 +1,29 @@
 # Test Summary for OpenAI SDK
 
 ## Issue
-The SORA API call in `app.js` was failing because the `fetch()` call was missing the `method: 'POST'` parameter.
+The SORA API call in `app.js` was failing with the error:
+```
+Error: Invalid method for URL (POST /v1/videos/generations)
+HTTP Status: 405 Method Not Allowed
+```
 
 ## Root Cause
-When `method` is not specified in a `fetch()` call, it defaults to `GET`. However, GET requests cannot have a request body, which caused the API call to fail with the error:
-```
-TypeError: Request with GET/HEAD method cannot have body
-```
+The code was using the wrong API endpoint. The OpenAI Sora API uses `/v1/videos` not `/v1/videos/generations`.
+
+**Evidence:**
+- `/v1/videos/generations` returns: "Invalid method for URL (POST /v1/videos/generations)" with HTTP 405
+- `/v1/videos` accepts POST and returns proper API authentication error (proving the endpoint is correct)
 
 ## Fix Applied
-Added `method: 'POST',` to the fetch call in the `generateVideo()` function at line 169 in `app.js`:
+Changed the API endpoint URL in the `generateVideo()` function at line 168 in `app.js`:
 
 ```javascript
+// BEFORE (WRONG):
 const response = await fetch('https://api.openai.com/v1/videos/generations', {
-    method: 'POST',  // <-- ADDED THIS LINE
+
+// AFTER (CORRECT):
+const response = await fetch('https://api.openai.com/v1/videos', {
+    method: 'POST',
     headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
@@ -51,13 +60,13 @@ All 4 tests pass successfully:
 - ✓ API Error Handling - should handle API errors correctly
 
 ## Files Modified
-1. `app.js` - Fixed missing `method: 'POST'` in generateVideo()
-2. `package.json` - Added Jest test infrastructure
-3. `__tests__/api.test.js` - Created comprehensive API tests
+1. `app.js` - Fixed incorrect API endpoint from `/v1/videos/generations` to `/v1/videos`
+2. `__tests__/api.test.js` - Updated tests to use correct endpoint
+3. `README.md` - Updated documentation with correct endpoint
 
 ## Verification
 The fix ensures that:
-- The SORA API call uses the correct HTTP method (POST)
-- The request structure matches the GPT5 PRO API call pattern
-- The API call can successfully send the request body
-- All tests pass, confirming the fix works correctly
+- The SORA API call uses the correct endpoint `/v1/videos`
+- The endpoint accepts POST requests (verified by receiving API key error instead of method error)
+- All tests pass with the updated endpoint
+- Documentation matches the implementation
